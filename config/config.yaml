@@ -1,1 +1,28 @@
+# Trading Platform Configuration
 
+database:
+  url: postgresql://trading_user:trading_password@localhost:5432/trading_db
+  pool_size: 10
+
+redis:
+  url: redis://localhost:6379/0
+
+exchanges:
+  binance:
+    enabled: false
+    api_key: ""
+    api_secret: ""
+  bybit:
+    enabled: false
+    api_key: ""
+    api_secret: ""
+
+trading:
+  risk_limits:
+    max_position_size: 1000
+    max_daily_loss: 500
+    max_open_positions: 5
+
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
