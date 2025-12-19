@@ -3,58 +3,80 @@
 Быстрые тесты основных функций
 """
 
+import sys
+import os
+
+# ДОБАВЬ ЭТУ СТРОЧКУ! Она исправляет поиск модулей
+sys.path.insert(0, os.path.abspath('.'))
+
 def test_1_calculations():
     """Тест 1: Проверка расчётов RiskManager"""
-    from src.risk.RiskManager import RiskManager, RiskLevel
-    
-    rm = RiskManager(
-        initial_capital=10000,
-        risk_per_trade=0.02,
-        risk_level=RiskLevel.MODERATE
-    )
-    
-    # Тест расчёта размера позиции
-    size, metrics = rm.calculate_position_size(
-        entry_price=50000,
-        stop_loss_price=49000
-    )
-    
-    print(f"✓ Position size: {size}")
-    print(f"✓ Position value: ${metrics.get('position_value', 0):.2f}")
-    return True
+    try:
+        from src.risk.RiskManager import RiskManager, RiskLevel
+        
+        rm = RiskManager(
+            initial_capital=10000,
+            risk_per_trade=0.02,
+            risk_level=RiskLevel.MODERATE
+        )
+        
+        # Тест расчёта размера позиции
+        size, metrics = rm.calculate_position_size(
+            entry_price=50000,
+            stop_loss_price=49000
+        )
+        
+        print(f"✓ Position size: {size}")
+        print(f"✓ Position value: ${metrics.get('position_value', 0):.2f}")
+        return True
+    except Exception as e:
+        print(f"✗ Ошибка: {e}")
+        return False
 
 def test_2_bot_creation():
     """Тест 2: Создание бота"""
-    from src.bots.BaseTradingBot import ExampleTradingBot
-    
-    bot = ExampleTradingBot(
-        api_key="test_key",
-        api_secret="test_secret",
-        test_mode=True
-    )
-    
-    health = bot.health_check()
-    print(f"✓ Bot health: {health['status']}")
-    print(f"✓ Test mode: {health['test_mode']}")
-    return True
+    try:
+        from src.bots.BaseTradingBot import ExampleTradingBot
+        
+        bot = ExampleTradingBot(
+            api_key="test_key",
+            api_secret="test_secret",
+            test_mode=True
+        )
+        
+        health = bot.health_check()
+        print(f"✓ Bot health: {health['status']}")
+        print(f"✓ Test mode: {health['test_mode']}")
+        return True
+    except Exception as e:
+        print(f"✗ Ошибка: {e}")
+        return False
 
 def test_3_market_data():
     """Тест 3: Создание MarketDataProcessor"""
-    from src.data.MarketData import MarketDataProcessor
-    
-    processor = MarketDataProcessor()
-    print(f"✓ MarketDataProcessor created")
-    return True
+    try:
+        from src.data.MarketData import MarketDataProcessor
+        
+        processor = MarketDataProcessor()
+        print(f"✓ MarketDataProcessor created")
+        return True
+    except Exception as e:
+        print(f"✗ Ошибка: {e}")
+        return False
 
 def test_4_order_types():
     """Тест 4: Проверка типов ордеров"""
-    from src.execution.OrderExecutor import OrderSide, OrderType
-    
-    print(f"✓ OrderSide.BUY: {OrderSide.BUY.value}")
-    print(f"✓ OrderSide.SELL: {OrderSide.SELL.value}")
-    print(f"✓ OrderType.MARKET: {OrderType.MARKET.value}")
-    print(f"✓ OrderType.LIMIT: {OrderType.LIMIT.value}")
-    return True
+    try:
+        from src.execution.OrderExecutor import OrderSide, OrderType
+        
+        print(f"✓ OrderSide.BUY: {OrderSide.BUY.value}")
+        print(f"✓ OrderSide.SELL: {OrderSide.SELL.value}")
+        print(f"✓ OrderType.MARKET: {OrderType.MARKET.value}")
+        print(f"✓ OrderType.LIMIT: {OrderType.LIMIT.value}")
+        return True
+    except Exception as e:
+        print(f"✗ Ошибка: {e}")
+        return False
 
 def run_all_tests():
     print("🚀 ЗАПУСК БЫСТРЫХ ТЕСТОВ")
@@ -94,6 +116,5 @@ def run_all_tests():
         return False
 
 if __name__ == "__main__":
-    import sys
     success = run_all_tests()
     sys.exit(0 if success else 1)
