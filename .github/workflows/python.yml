@@ -24,6 +24,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install httpx pandas numpy scipy
         
+    - name: Fix Python path
+      run: |
+        echo "PYTHONPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+        
     - name: Check project structure
       run: |
         echo "=== CHECKING PROJECT STRUCTURE ==="
