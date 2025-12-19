@@ -1,26 +1,12 @@
-# Trading Platform
+## 🌐 Веб-Интерфейс
 
-Modular cryptocurrency trading platform with support for multiple exchanges.
+Trading Bot включает полноценный веб-интерфейс на Streamlit.
 
-## Features
-- Multi-exchange trading (Binance, Bybit, etc.)
-- Real-time market data
-- Risk management
-- Web interface and REST API
-- Docker support
-
-## Quick Start
+### Запуск веб-интерфейса:
 
 ```bash
-# Clone repository
-git clone https://github.com/6nicky9/trading-platform.git
-cd trading-platform
+# Способ 1: Через скрипт запуска
+python run_web.py
 
-# Install dependencies
-pip install -e .
-
-# Run tests
-pytest tests/
-
-# Start with Docker
-docker-compose up
+# Способ 2: Напрямую через Streamlit
+streamlit run app.py
