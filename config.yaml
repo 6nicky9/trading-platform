@@ -1,0 +1,40 @@
+# Trading Bot Configuration
+
+bot:
+  name: "Crypto Trading Bot"
+  version: "1.0.0"
+  mode: "paper"  # paper, live
+
+trading:
+  symbols:
+    - BTC/USDT
+    - ETH/USDT
+    - ADA/USDT
+  initial_balance: 10000.0
+  test_mode: true
+
+strategy:
+  type: "SimpleStrategy"
+  parameters:
+    fast_period: 10
+    slow_period: 30
+    rsi_period: 14
+  
+risk:
+  risk_per_trade: 0.02  # 2%
+  max_daily_loss: 0.05  # 5%
+  stop_loss_pct: 0.05   # 5%
+  take_profit_pct: 0.10  # 10%
+
+api:
+  binance:
+    api_key: ""
+    api_secret: ""
+    testnet: true
+  coingecko:
+    api_key: ""
+
+logging:
+  level: "INFO"
+  file: "logs/trading_bot.log"
+  console: true
