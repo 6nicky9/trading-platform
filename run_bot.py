@@ -1,112 +1,130 @@
 #!/usr/bin/env python3
 """
-Основной файл для запуска торгового бота
+Enhanced trading bot runner
 """
 
 import yaml
 import logging
-import time
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 from src.strategies.SimpleStrategy import SimpleStrategy
 from src.risk.RiskManager import RiskManager, RiskLevel
+from src.exchange.BinanceClient import BinanceClient
+from src.utils.Logger import TradeLogger
 
-def setup_logging():
-    """Настройка логирования"""
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler('trading_bot.log'),
-            logging.StreamHandler()
-        ]
-    )
-
-def load_config():
-    """Загрузка конфигурации"""
-    with open('config.yaml', 'r') as f:
-        return yaml.safe_load(f)
-
-def main():
-    """Основная функция запуска"""
-    print("\n" + "="*60)
-    print("🚀 ЗАПУСК ТОРГОВОГО БОТА")
-    print("="*60)
+class TradingBot:
+    """Main trading bot class"""
     
-    # Настройка логирования
-    setup_logging()
-    logger = logging.getLogger("Main")
+    def __init__(self, config_file: str = 'config.yaml'):
+        self.config = self.load_config(config_file)
+        self.setup_logging()
+        self.initialize_components()
+        
+    def load_config(self, config_file: str):
+        """Load configuration file"""
+        with open(config_file, 'r') as f:
+            return yaml.safe_load(f)
     
-    # Загрузка конфигурации
-    config = load_config()
+    def setup_logging(self):
+        """Setup logging system"""
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        self.logger = logging.getLogger("TradingBot")
     
-    print(f"\n🤖 Бот: {config['bot']['name']}")
-    print(f"📊 Режим: {config['bot']['mode'].upper()}")
-    print(f"💰 Начальный баланс: ${config['trading']['initial_balance']}")
-    print(f"📈 Торгуемые пары: {', '.join(config['trading']['symbols'])}")
+    def initialize_components(self):
+        """Initialize all bot components"""
+        # Strategy
+        strategy_cfg = self.config['strategy']['parameters']
+        self.strategy = SimpleStrategy(
+            fast_period=strategy_cfg['fast_period'],
+            slow_period=strategy_cfg['slow_period']
+        )
+        
+        # Risk Manager
+        self.risk_manager = RiskManager(
+            initial_capital=self.config['trading']['initial_balance'],
+            risk_per_trade=self.config['risk']['risk_per_trade'],
+            risk_level=RiskLevel.MODERATE
+        )
+        
+        # Exchange Client
+        self.exchange = BinanceClient(
+            testnet=self.config['trading']['test_mode']
+        )
+        
+        # Trade Logger
+        self.trade_logger = TradeLogger()
+        
+        self.logger.info("All components initialized")
     
-    # Инициализация стратегии
-    strategy_params = config['strategy']['parameters']
-    strategy = SimpleStrategy(
-        fast_period=strategy_params['fast_period'],
-        slow_period=strategy_params['slow_period']
-    )
-    
-    # Инициализация менеджера рисков
-    risk_manager = RiskManager(
-        initial_capital=config['trading']['initial_balance'],
-        risk_per_trade=config['risk']['risk_per_trade'],
-        risk_level=RiskLevel.MODERATE
-    )
-    
-    print(f"\n📊 Стратегия: {config['strategy']['type']}")
-    print(f"⚙️ Параметры: {strategy_params}")
-    
-    # Имитация рыночных данных
-    sample_prices = {
-        'BTC/USDT': [50000, 50200, 50100, 50300, 50500, 50400, 50600],
-        'ETH/USDT': [3000, 3010, 3020, 3030, 3040, 3050, 3060]
-    }
-    
-    print("\n🔍 Анализ рынка...")
-    
-    for symbol in config['trading']['symbols'][:2]:  # Первые 2 символа
-        if symbol in sample_prices:
-            market_data = {
-                'symbol': symbol,
-                'prices': sample_prices[symbol],
-                'timestamp': datetime.now()
-            }
-            
-            # Генерация сигнала
-            signal = strategy.generate_signal(market_data)
-            
-            print(f"\n{symbol}:")
-            print(f"  Цена: ${market_data['prices'][-1]}")
-            if signal['action']:
-                print(f"  Сигнал: {signal['action']}")
-                print(f"  Уверенность: {signal['confidence']*100:.1f}%")
+    def run(self):
+        """Main bot loop"""
+        self.logger.info("Starting trading bot...")
+        
+        # Get account info
+        balance = self.exchange.get_account_balance()
+        self.logger.info(f"Account balance: {balance}")
+        
+        # Monitor symbols
+        symbols = self.config['trading']['symbols']
+        
+        for symbol in symbols[:2]:  # Test with first 2 symbols
+            price = self.exchange.get_ticker_price(symbol)
+            if price:
+                self.logger.info(f"{symbol} price: ${price}")
                 
-                # Расчёт размера позиции
-                price = market_data['prices'][-1]
-                stop_loss = price * (1 - config['risk']['stop_loss_pct'])
-                position_size, metrics = risk_manager.calculate_position_size(
-                    entry_price=price,
-                    stop_loss_price=stop_loss
-                )
-                
-                print(f"  Размер позиции: {position_size:.4f}")
-                print(f"  Стоимость позиции: ${metrics.get('position_value', 0):.2f}")
-            else:
-                print(f"  Сигнал: НЕТ (ожидание)")
+                # Get historical data
+                klines = self.exchange.get_klines(symbol, '1h', 50)
+                if klines:
+                    prices = [float(k['close']) for k in klines]
+                    
+                    # Generate signal
+                    market_data = {
+                        'symbol': symbol,
+                        'prices': prices,
+                        'current_price': float(price)
+                    }
+                    
+                    signal = self.strategy.generate_signal(market_data)
+                    
+                    if signal['action']:
+                        self.execute_trade(symbol, signal, float(price))
     
-    print("\n" + "="*60)
-    print("✅ Бот успешно инициализирован!")
-    print("📋 Следующие шаги:")
-    print("   1. Подключение к реальной бирже (Binance API)")
-    print("   2. Настройка WebSocket для реальных данных")
-    print("   3. Реализация исполнения ордеров")
-    print("   4. Добавление больше стратегий")
-    print("="*60)
+    def execute_trade(self, symbol: str, signal: Dict, price: float):
+        """Execute a trade based on signal"""
+        self.logger.info(f"Signal detected: {signal}")
+        
+        # Calculate position size
+        stop_loss = price * (1 - self.config['risk']['stop_loss_pct'])
+        position_size, metrics = self.risk_manager.calculate_position_size(
+            entry_price=price,
+            stop_loss_price=stop_loss
+        )
+        
+        # Log trade
+        trade_data = {
+            'symbol': symbol,
+            'action': signal['action'],
+            'price': price,
+            'size': float(position_size),
+            'value': float(metrics.get('position_value', 0)),
+            'confidence': signal['confidence'],
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        self.trade_logger.log_trade(trade_data)
+        self.logger.info(f"Trade executed: {trade_data}")
 
 if __name__ == "__main__":
-    main()
+    print("\n" + "="*60)
+    print("🚀 ENHANCED TRADING BOT v1.0")
+    print("="*60)
+    
+    bot = TradingBot()
+    bot.run()
