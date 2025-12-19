@@ -1,7 +1,9 @@
-fastapi==0.104.0
-uvicorn[standard]==0.24.0
-sqlalchemy==2.0.0
-psycopg2-binary==2.9.9
-redis==5.0.0
-python-dotenv==1.0.0
-ccxt==4.0.3  # Изменено на существующую версию
+# Веб-интерфейс
+streamlit>=1.28.0
+plotly>=5.17.0
+dash>=2.14.0
+flask>=3.0.0
+
+# Визуализация
+matplotlib>=3.7.0
+seaborn>=0.12.0
