@@ -6,7 +6,7 @@
 import os
 import sys
 import importlib
-
+sys.path.insert(0, os.path.abspath('.'))
 def check_file_exists(path):
     """Проверяет существует ли файл"""
     exists = os.path.exists(path)
