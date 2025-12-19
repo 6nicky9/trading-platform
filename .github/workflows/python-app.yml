@@ -10,31 +10,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: trading_user
-          POSTGRES_PASSWORD: trading_password
-          POSTGRES_DB: trading_db
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
     - uses: actions/checkout@v4
     
@@ -46,12 +21,19 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install fastapi uvicorn pytest sqlalchemy psycopg2-binary redis
+        pip install fastapi uvicorn pytest pyyaml toml
         pip install -e .
     
-    - name: Wait for PostgreSQL
-      run: sleep 10
-    
-    - name: Run simple test
+    - name: Run all tests
       run: |
-        python -c "from src.core import TradingPlatform; platform = TradingPlatform(); print('Platform created:', platform.name)"
+        echo "Running all test files..."
+        pytest tests/ -v
+    
+    - name: Check imports
+      run: |
+        python -c "from src.core import TradingPlatform; print('✓ Core module imports')"
+        python -c "from src.bots import BaseTradingBot; print('✓ Bots module imports')"
+        python -c "from src.data import MarketData; print('✓ Data module imports')"
+        python -c "from src.execution import OrderExecutor; print('✓ Execution module imports')"
+        python -c "from src.risk import RiskManager; print('✓ Risk module imports')"
+        python -c "from src.web.api import app; print('✓ Web module imports')"
