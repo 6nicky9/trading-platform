@@ -1,31 +1,29 @@
 # В разделе с табами добавь новую вкладку:
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Дашборд", "📈 Графики", "📋 Сделки", "⚙️ Настройки", "🌐 WebSocket"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    "📊 Дашборд", "📈 Графики", "📋 Сделки", "⚙️ Настройки", "🌐 WebSocket", "🔔 Уведомления"
+])
 
-# Добавь новую вкладку WebSocket
-with tab5:
-    st.subheader("🌐 WebSocket - Реальные данные")
+# Добавь новую вкладку Уведомления
+with tab6:
+    st.subheader("🔔 Система уведомлений")
     
-    # Импортируем WebSocket дашборд
     try:
-        from src.websocket.WebSocketDashboard import WebSocketDashboard
+        from src.notifications.NotificationDashboard import NotificationDashboard
         
         # Создаем экземпляр дашборда
-        ws_dashboard = WebSocketDashboard()
+        notification_dashboard = NotificationDashboard()
         
-        # Отображаем компоненты
-        ws_dashboard.display_websocket_status()
-        ws_dashboard.display_ticker_panel()
-        
-        st.markdown("---")
-        
-        # Графики в реальном времени
-        ws_dashboard.display_real_time_chart("btcusdt", "Bitcoin (BTC/USDT)")
-        
-        st.markdown("---")
-        
-        # Стакан ордеров
-        ws_dashboard.display_order_book("btcusdt", 10)
+        # Отображаем панель управления
+        notification_dashboard.display_notification_panel()
         
     except ImportError as e:
-        st.warning("WebSocket модуль не установлен")
+        st.warning("Модуль уведомлений не установлен")
         st.code(f"Ошибка: {e}")
+        
+        # Альтернативная простая панель
+        st.info("Для использования системы уведомлений установите необходимые зависимости:")
+        st.code("""
+        pip install python-telegram-bot>=20.0
+        pip install requests>=2.31.0
+        pip install pyyaml>=6.0
+        """)
