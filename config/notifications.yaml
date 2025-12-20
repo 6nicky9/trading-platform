@@ -1,0 +1,140 @@
+# Configuration for Notification System
+
+telegram:
+  enabled: true
+  bot_token: "YOUR_TELEGRAM_BOT_TOKEN"  # Получить у @BotFather
+  chat_id: "YOUR_CHAT_ID"              # Получить у @userinfobot
+  parse_mode: "HTML"
+  silent: false
+
+email:
+  enabled: false
+  smtp_server: "smtp.gmail.com"
+  smtp_port: 587
+  username: "your-email@gmail.com"
+  password: "your-app-password"        # Для Gmail использовать App Password
+  sender_email: "your-email@gmail.com"
+  receiver_emails:
+    - "alert1@example.com"
+    - "alert2@example.com"
+
+pushbullet:
+  enabled: false
+  access_token: "YOUR_PUSHBULLET_ACCESS_TOKEN"
+  device_id: "YOUR_DEVICE_ID"
+
+discord:
+  enabled: false
+  webhook_url: "YOUR_DISCORD_WEBHOOK_URL"
+
+slack:
+  enabled: false
+  webhook_url: "YOUR_SLACK_WEBHOOK_URL"
+  channel: "#trading-alerts"
+
+webhook:
+  enabled: false
+  url: "https://your-webhook-url.com/notify"
+  headers:
+    Authorization: "Bearer YOUR_API_TOKEN"
+    Content-Type: "application/json"
+  method: "POST"
+
+# Alert settings
+alerts:
+  price_alerts:
+    enabled: true
+    thresholds:
+      btcusdt:
+        above: 60000
+        below: 45000
+      ethusdt:
+        above: 4000
+        below: 2500
+  
+  trade_signals:
+    enabled: true
+    min_confidence: 0.6
+    send_on_all: false
+  
+  errors:
+    enabled: true
+    send_critical_only: false
+  
+  performance_reports:
+    enabled: true
+    schedule:
+      daily: "18:00"
+      weekly: "sunday 20:00"
+      monthly: "last_day 21:00"
+
+# Notification rules
+rules:
+  - name: "critical_errors"
+    condition: "priority == 'critical'"
+    channels: ["telegram", "email"]
+    retry: true
+    retry_count: 3
+  
+  - name: "trade_signals"
+    condition: "type == 'trade_signal' and confidence >= 0.7"
+    channels: ["telegram"]
+    retry: false
+  
+  - name: "daily_reports"
+    condition: "type == 'performance_report'"
+    channels: ["email"]
+    retry: true
+    retry_count: 2
+
+# Rate limiting
+rate_limiting:
+  enabled: true
+  max_per_hour: 60
+  max_per_day: 500
+  burst_limit: 10
+
+# Logging
+logging:
+  enabled: true
+  level: "INFO"
+  file: "logs/notifications.log"
+  max_size_mb: 10
+  backup_count: 5
+
+# Templates (optional)
+templates:
+  trade_signal:
+    telegram: |
+      🚀 *{strategy} Signal*
+      Symbol: {symbol}
+      Action: {action}
+      Price: ${price}
+      Confidence: {confidence}%
+      Time: {timestamp}
+    
+    email:
+      subject: "Trading Signal: {action} {symbol}"
+      body: |
+        <h2>Trading Signal Alert</h2>
+        <p><strong>Strategy:</strong> {strategy}</p>
+        <p><strong>Symbol:</strong> {symbol}</p>
+        <p><strong>Action:</strong> {action}</p>
+        <p><strong>Price:</strong> ${price}</p>
+        <p><strong>Confidence:</strong> {confidence}%</p>
+        <p><strong>Time:</strong> {timestamp}</p>
+  
+  price_alert:
+    telegram: |
+      📊 *Price Alert*
+      {symbol}: ${current_price}
+      Threshold: ${threshold} ({direction})
+      Time: {timestamp}
+  
+  error:
+    telegram: |
+      🚨 *Error Alert*
+      Component: {component}
+      Type: {error_type}
+      Message: {error_message}
+      Time: {timestamp}
