@@ -1,9 +1,20 @@
-# Веб-интерфейс
-streamlit>=1.28.0
-plotly>=5.17.0
-dash>=2.14.0
-flask>=3.0.0
+# Аутентификация и безопасность
+streamlit-authenticator==0.2.2
+bcrypt==4.0.1
+pyjwt>=2.8.0
+cryptography>=41.0.0
 
-# Визуализация
-matplotlib>=3.7.0
-seaborn>=0.12.0
+# WebSocket и реальные данные
+websocket-client>=1.6.0
+ccxt.pro==0.3.26
+aiohttp>=3.9.0
+
+# Уведомления
+python-telegram-bot>=20.0
+twilio>=8.10.0
+pushbullet.py>=0.12.0
+
+# Мобильная версия и отчеты
+flet>=0.14.0  # для мобильной версии
+reportlab>=4.0.0  # PDF отчеты
+openpyxl>=3.1.0  # Excel отчеты
