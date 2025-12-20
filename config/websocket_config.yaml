@@ -1,0 +1,62 @@
+# WebSocket Configuration
+
+exchanges:
+  binance:
+    enabled: true
+    websocket_url: "wss://stream.binance.com:9443/ws"
+    public_streams:
+      - "btcusdt@kline_1m"
+      - "ethusdt@kline_1m"
+      - "adausdt@kline_1m"
+      - "btcusdt@trade"
+      - "ethusdt@trade"
+      - "btcusdt@depth20@100ms"
+  
+  bybit:
+    enabled: false
+    websocket_url: "wss://stream.bybit.com/v5/public/spot"
+    public_streams:
+      - "kline.1.BTCUSDT"
+      - "tickers.BTCUSDT"
+  
+  coinbase:
+    enabled: false
+    websocket_url: "wss://ws-feed.pro.coinbase.com"
+  
+  kraken:
+    enabled: false
+    websocket_url: "wss://ws.kraken.com"
+
+subscriptions:
+  default_symbols:
+    - "BTC/USDT"
+    - "ETH/USDT"
+    - "ADA/USDT"
+    - "SOL/USDT"
+  
+  intervals:
+    - "1m"
+    - "5m"
+    - "15m"
+    - "1h"
+
+data_retention:
+  candles: 1000
+  trades: 500
+  orderbook_depth: 50
+  cache_ttl_seconds: 300
+
+reconnection:
+  max_retries: 10
+  retry_delay: 5
+  ping_interval: 30
+
+performance:
+  max_connections: 5
+  update_rate_ms: 1000
+  batch_size: 100
+
+logging:
+  level: "INFO"
+  file: "logs/websocket.log"
+  console: true
